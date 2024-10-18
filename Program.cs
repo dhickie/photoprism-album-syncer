@@ -1,18 +1,22 @@
-﻿using System.Reflection;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace PhotoPrismAlbumSyncer
 {
     internal class Program
     {
-        private static Config _config;
         private static PhotoPrismClient _client;
         private static string _basePath;
 
         static async Task Main(string[] args)
         {
-            _config = new Config();
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("config.json", optional: false);
+            var configurationRoot = builder.Build();
+            var config = configurationRoot.Get<Config>();
+
             var httpClient = new HttpClient();
-            _client = new PhotoPrismClient(httpClient, _config);
+            _client = new PhotoPrismClient(httpClient, config);
 
             _basePath = Directory.GetCurrentDirectory();
             await IterateYears();
