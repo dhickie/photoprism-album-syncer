@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using PhotoPrismAlbumSyncer.Models.Requests;
-using PhotoPrismAlbumSyncer.Models.Responses;
+﻿using System.Text.Json;
 
 namespace PhotoPrismAlbumSyncer
 {
@@ -62,7 +60,7 @@ namespace PhotoPrismAlbumSyncer
             {
                 Method = method,
                 RequestUri = new Uri($"{_config.PhotoPrismUrl}/{path}"),
-                Content = new StringContent(JsonConvert.SerializeObject(body))
+                Content = new StringContent(JsonSerializer.Serialize(body))
             };
 
             return await MakeRequest<TResponse>(request);
@@ -87,7 +85,7 @@ namespace PhotoPrismAlbumSyncer
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<TResponse>(responseBody);
+            return JsonSerializer.Deserialize<TResponse>(responseBody);
         }
     }
 }
