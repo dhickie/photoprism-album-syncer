@@ -14,39 +14,33 @@ namespace PhotoPrismAlbumSyncer
             var httpClient = new HttpClient();
             _client = new PhotoPrismClient(httpClient, _config);
 
-            _basePath = Assembly.GetExecutingAssembly().Location;
-            await WalkDirectoryTree(_basePath);
+            _basePath = Directory.GetCurrentDirectory();
+            await IterateYears();
         }
 
-        private static async Task WalkDirectoryTree(string currentPath)
+        private static async Task IterateYears()
         {
-            // Walk the directory tree until we hit one that contains files
-            var directories = Directory.GetDirectories(currentPath);
-            var files = Directory.GetFiles(currentPath);
-
-            Console.WriteLine($"Scanning directory {currentPath}");
-
-            if (files.Length > 0)
+            var years = Directory.GetDirectories(_basePath);
+            foreach (var year in years)
             {
-                Console.WriteLine($"Found {files.Length} files");
-                var albumName = Path.GetDirectoryName(currentPath);
-                await CreateAlbum(albumName, files);
-            }
-
-            Console.WriteLine($"Scanning {directories.Length} sub-directories");
-            foreach (var directory in directories)
-            {
-                await WalkDirectoryTree(directory);
+                var albums = Directory.GetDirectories(year);
+                foreach (var album in albums)
+                {
+                    var albumName = Path.GetRelativePath(year, album);
+                    var files = Directory.GetFiles(album);
+                    await CreateAlbum(year, albumName, files);
+                }
             }
         }
 
-        private static async Task CreateAlbum(string albumName, string[] files)
+        private static async Task CreateAlbum(string year, string albumName, string[] files)
         {
             var photoIds = new List<string>();
+            var yearDirectory = Path.GetRelativePath(_basePath, year);
             foreach (var file in files)
             {
-                var photoPath = Path.GetRelativePath(_basePath, file);
-                photoPath = photoPath.TrimStart('\\');
+                var fileName = Path.GetFileName(file);
+                var photoPath = $"{yearDirectory}/{fileName}";
 
                 Console.WriteLine($"Getting photo ID for path {photoPath}");
                 photoIds.Add(await _client.GetPhotoUid(photoPath));

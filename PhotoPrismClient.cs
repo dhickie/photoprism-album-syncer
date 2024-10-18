@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using PhotoPrismAlbumSyncer.Models.Requests;
+using PhotoPrismAlbumSyncer.Models.Responses;
+using System.Text.Json;
 
 namespace PhotoPrismAlbumSyncer
 {
@@ -15,43 +17,40 @@ namespace PhotoPrismAlbumSyncer
 
         public async Task<string> CreateAlbum(string albumName)
         {
-            return Guid.NewGuid().ToString();
-            //var path = "api/v1/albums";
-            //var body = new CreateAlbumRequest()
-            //{
-            //    Title = albumName
-            //};
-            //
-            //var response = await MakeRequest<CreateAlbumRequest, CreateAlbumResponse>(body, path, HttpMethod.Post);
-            //return response.UID;
+            var path = "api/v1/albums";
+            var body = new CreateAlbumRequest()
+            {
+                Title = albumName
+            };
+            
+            var response = await MakeRequest<CreateAlbumRequest, CreateAlbumResponse>(body, path, HttpMethod.Post);
+            return response.UID;
         }
 
         public async Task<string> GetPhotoUid(string photoPath)
         {
-            return Guid.NewGuid().ToString();
-            //var path = $"api/v1/photos?count=1&q=filename:{photoPath}";
-            //
-            //var response = await MakeRequest<GetPhotoResponse>(path, HttpMethod.Get);
-            //return response.UID;
+            var path = $"api/v1/photos?count=1&q=filename:{photoPath}";
+            
+            var response = await MakeRequest<GetPhotoResponse>(path, HttpMethod.Get);
+            return response.UID;
         }
 
         public async Task<bool> AddPhotosToAlbum(string albumUid, string[] photoUids)
         {
-            return true;
-            //var path = $"api/v1/albums/{albumUid}/photos";
-            //var body = new AddPhotosToAlbumRequest()
-            //{
-            //    All = true,
-            //    Photos = photoUids
-            //};
-            //
-            //var response = await MakeRequest<AddPhotosToAlbumRequest, AddPhotosToAlbumResponse>(body, path, HttpMethod.Post);
-            //if (response.Photos.Length == photoUids.Length)
-            //{
-            //    return true;
-            //}
-            //
-            //return false;
+            var path = $"api/v1/albums/{albumUid}/photos";
+            var body = new AddPhotosToAlbumRequest()
+            {
+                All = true,
+                Photos = photoUids
+            };
+            
+            var response = await MakeRequest<AddPhotosToAlbumRequest, AddPhotosToAlbumResponse>(body, path, HttpMethod.Post);
+            if (response.Photos.Length == photoUids.Length)
+            {
+                return true;
+            }
+            
+            return false;
         }
 
         private async Task<TResponse> MakeRequest<TRequest,TResponse>(TRequest body, string path, HttpMethod method)
