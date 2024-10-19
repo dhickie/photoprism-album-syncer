@@ -17,7 +17,7 @@ namespace PhotoPrismAlbumSyncer
 
             var httpClient = new HttpClient();
             _client = new PhotoPrismClient(httpClient, config);
-
+            
             _basePath = Directory.GetCurrentDirectory();
             await IterateYears();
         }
@@ -47,7 +47,11 @@ namespace PhotoPrismAlbumSyncer
                 var photoPath = $"{yearDirectory}/{fileName}";
 
                 Console.WriteLine($"Getting photo ID for path {photoPath}");
-                photoIds.Add(await _client.GetPhotoUid(photoPath));
+                var id = await _client.GetPhotoUid(photoPath);
+                if (id != null)
+                {
+                    photoIds.Add(id);
+                }
             }
 
             Console.WriteLine($"Creating album for name {albumName}");
