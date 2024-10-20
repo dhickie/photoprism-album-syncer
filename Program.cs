@@ -30,9 +30,10 @@ namespace PhotoPrismAlbumSyncer
                 var albums = Directory.GetDirectories(year);
                 foreach (var album in albums)
                 {
-                    var albumName = Path.GetRelativePath(year, album);
+                    var yearDirectory = Path.GetRelativePath(_basePath, year);
+                    var albumName = $"{yearDirectory} - {Path.GetRelativePath(year, album)}";
                     var files = Directory.GetFiles(album);
-                    await CreateAlbum(year, albumName, files);
+                    await CreateAlbum(yearDirectory, albumName, files);
                 }
             }
         }
@@ -40,11 +41,10 @@ namespace PhotoPrismAlbumSyncer
         private static async Task CreateAlbum(string year, string albumName, string[] files)
         {
             var photoIds = new List<string>();
-            var yearDirectory = Path.GetRelativePath(_basePath, year);
             foreach (var file in files)
             {
                 var fileName = Path.GetFileName(file);
-                var photoPath = $"{yearDirectory}/{fileName}";
+                var photoPath = $"{year}/{fileName}";
 
                 Console.WriteLine($"Getting photo ID for path {photoPath}");
                 var id = await _client.GetPhotoUid(photoPath);
