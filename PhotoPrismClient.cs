@@ -32,12 +32,7 @@ namespace PhotoPrismAlbumSyncer
             var path = $"api/v1/photos?count=1&q=filename:{photoPath}";
             
             var response = await MakeRequest<GetPhotoResponse[]>(path, HttpMethod.Get);
-            var id = response.SingleOrDefault()?.UID;
-            if (id == null)
-            {
-                Console.WriteLine($"WARN: Unable to find file {photoPath}");
-            }
-            return id;
+            return response.SingleOrDefault()?.UID;
         }
 
         public async Task<bool> AddPhotosToAlbum(string albumUid, string[] photoUids)

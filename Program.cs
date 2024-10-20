@@ -44,19 +44,40 @@ namespace PhotoPrismAlbumSyncer
             foreach (var file in files)
             {
                 var fileName = Path.GetFileName(file);
-                var photoPath = $"{year}/{fileName}";
+                var yearInt = int.Parse(year);
+                var photoPath = GeneratePhotoPath(yearInt, fileName);
 
                 Console.WriteLine($"Getting photo ID for path {photoPath}");
                 var id = await _client.GetPhotoUid(photoPath);
+                if (id == null)
+                {
+                    // Try one year before and after for albums that span years
+                    id = await _client.GetPhotoUid(GeneratePhotoPath(yearInt - 1, fileName));
+
+                    if (id == null)
+                    {
+                        id = await _client.GetPhotoUid(GeneratePhotoPath(yearInt + 1, fileName));
+                    }
+                }
+
                 if (id != null)
                 {
                     photoIds.Add(id);
+                }
+                else
+                {
+                    Console.WriteLine($"WARN: Unable to find photo UID for filename {photoPath}");
                 }
             }
 
             Console.WriteLine($"Creating album for name {albumName}");
             var albumId = await _client.CreateAlbum(albumName);
             await _client.AddPhotosToAlbum(albumId, photoIds.ToArray());
+        }
+
+        private static string GeneratePhotoPath(int year, string fileName)
+        {
+            return $"{year}/{fileName}";
         }
     }
 }
